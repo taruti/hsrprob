@@ -1,6 +1,6 @@
 module Main where
 
-import Lib
+import Hsrprob
 
 main :: IO ()
 main = someFunc
