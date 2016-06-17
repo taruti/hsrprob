@@ -2,6 +2,7 @@ module Hsrprob where
 --    ( someFunc
 --    ) where
 
+import Control.Monad
 import qualified Data.Vector as VB
 import qualified Data.Vector.Unboxed as V
 import GHC.Float(float2Double)
@@ -75,8 +76,37 @@ glitchProb v =
 zips1 :: [x] -> [(Int,x)]
 zips1 = tail . zip [0..]
 
+
 glitchGraph = toFile def "glitch_prob.png" $ do
     layout_title .= "Probability to glitch"
     setColors [opaque blue, opaque red]
     plot (line "glitch" [take 10 $ zips1 glitchProbs])
     plot (line "critical glitch" [take 10 $ zips1 cglitchProbs])
+
+succ1Graph = succGraph "success_1.png" [1..5]
+succ2Graph = succGraph "success_2.png" [5..15]
+
+succGraph fn ts = toFile def fn $ do
+    layout_title .= "Number of successes"
+    forM_ ts $ \ndice -> do
+      let caption = show ndice ++ " dice"
+          v = V.toList $ (VB.!) successes ndice
+          s :: [(Int,Float)]
+          s = zip [0..] v
+      plot (line caption [s])
+
+nthsuc = (VB.!) successes
+
+succAL1Graph = succAtLeast "success_al_1.png" [1..5]
+succAL2Graph = succAtLeast "success_al_2.png" [5..10]
+succAL3Graph = succAtLeast "success_al_3.png" [10..15]
+
+succAtLeast fn ts = toFile def fn $ do
+    layout_title .= "At least N successes"
+    forM_ ts $ \ndice -> do
+      let caption = show ndice ++ " dice"
+          v = (VB.!) successes ndice
+          s :: [(Int,Float)]
+          s = map f [1.. min 10 $ V.length v]
+          f x = (x, V.sum $ V.drop x v)
+      plot (line caption [s])
